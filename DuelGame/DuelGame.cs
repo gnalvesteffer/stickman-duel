@@ -8,6 +8,8 @@ namespace Xorberax.Duel.DuelGame;
 
 public class DuelGame : Game
 {
+    protected override string Title => "Stickman Duel by Xorberax";
+
     private readonly AsepriteAnimationInfo _stickmanAnimationInfo;
 
     private DuelGameState _state = new();
@@ -38,13 +40,13 @@ public class DuelGame : Game
     protected override void Draw()
     {
         Raylib.ClearBackground(Color.Gray);
-        Raylib.DrawText("Duel Game by Xorberax", 10, 10, 20, Color.Black);
+        Raylib.DrawText(Title, 10, 10, 20, Color.Black);
 
-        DrawStickman(_state.PlayerStickman, true);
-        DrawStickman(_state.OpponentStickman, false);
+        DrawStickman(_state.PlayerStickman, true, Color.DarkBlue);
+        DrawStickman(_state.OpponentStickman, false, Color.Red);
     }
 
-    private void DrawStickman(Stickman stickman, bool shouldFlipHorizontally)
+    private void DrawStickman(Stickman stickman, bool shouldFlipHorizontally, Color color)
     {
         var frameTagName = stickman.AnimationType.ToAsepriteFrameTagName();
         var frameTag = _stickmanAnimationInfo.Meta.GetFrameTag(frameTagName);
@@ -69,7 +71,7 @@ public class DuelGame : Game
                 currentFrameInfo.Frame.W * 0.5f,
                 currentFrameInfo.Frame.H * 0.5f
             ),
-            Color.White
+            color
         );
     }
 }

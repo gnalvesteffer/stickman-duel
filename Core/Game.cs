@@ -4,9 +4,11 @@ namespace Xorberax.Duel.Core;
 
 public abstract class Game
 {
+    protected virtual string Title => "Game";
+    
     public void Start()
     {
-        Raylib.InitWindow(1280, 700, "Duel Game by Xorberax");
+        Raylib.InitWindow(1280, 700, Title);
 
         Init();
 
