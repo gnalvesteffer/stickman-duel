@@ -35,4 +35,12 @@ public static class StickmanAnimationTypeExtensions
         StickmanAnimationType.BlockLow => "block-low",
         _ => throw new ArgumentOutOfRangeException(nameof(animationType), animationType, null)
     };
+
+    public static StickmanAnimationType GetBlockAnimationForAttack(this StickmanAnimationType attackAnimationType) => attackAnimationType switch
+    {
+        StickmanAnimationType.AttackHigh => StickmanAnimationType.BlockHigh,
+        StickmanAnimationType.AttackMiddle => StickmanAnimationType.BlockMiddle,
+        StickmanAnimationType.AttackLow => StickmanAnimationType.BlockLow,
+        _ => throw new ArgumentOutOfRangeException(nameof(attackAnimationType), attackAnimationType, "Not a valid attack animation type")
+    };
 }

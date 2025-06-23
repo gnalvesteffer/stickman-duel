@@ -49,7 +49,9 @@ public class DuelGame : Game
         var opponentAnimationProgress = GetStickmanAnimationFrame(_state.OpponentStickman).AnimationProgress;
         if (opponentAnimationProgress > 1.0f)
         {
-            _state.OpponentStickman.Animation = AttackAnimations[Random.Shared.Next(AttackAnimations.Length)];
+            var newOpponentAttack = AttackAnimations[Random.Shared.Next(AttackAnimations.Length)];
+            _state.OpponentStickman.Animation = newOpponentAttack;
+            _state.PlayerStickman.Animation = newOpponentAttack.GetBlockAnimationForAttack();
         }
     }
 
@@ -86,7 +88,7 @@ public class DuelGame : Game
             (int)(stickman.Position.Y + currentFrameInfo.Frame.H * 0.4f),
             (int)(currentFrameInfo.Frame.H * 0.5f),
             16,
-            Color.Black
+            new Color(0.25f, 0.28f, 0.28f)
         );
     }
 
