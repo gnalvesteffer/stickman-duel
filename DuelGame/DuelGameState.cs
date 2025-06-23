@@ -1,7 +1,7 @@
 namespace Xorberax.Duel.DuelGame;
 
-public record DuelGameState
+public class DuelGameState
 {
-    public Stickman PlayerStickman { get; set; } = new();
-    public Stickman OpponentStickman { get; set; } = new();
+    public Stickman PlayerStickman { get; init; } = new();
+    public Stickman OpponentStickman { get; init; } = new();
 }
