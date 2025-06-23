@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Xorberax.Duel.DuelGame;
 
 /// <summary>

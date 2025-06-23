@@ -1,18 +1,30 @@
 using System.Numerics;
+using Raylib_cs;
 
 namespace Xorberax.Duel.DuelGame;
 
 public class Stickman
 {
+    private StickmanAnimationType _animation = StickmanAnimationType.Idle;
+
     /// <summary>
     ///    The current animation of the stickman.
     /// </summary>
-    public StickmanAnimationType AnimationType { get; set; } = StickmanAnimationType.Idle;
-    
+    public StickmanAnimationType Animation
+    {
+        get => _animation;
+        set
+        {
+            _animation = value;
+            AnimationStartTime = Raylib.GetTime();
+        }
+    }
+
     /// <summary>
     ///     The timestamp when the current animation started.
     /// </summary>
-    public float AnimationStartTime { get; set; } = 0.0f;
-    
+    public double AnimationStartTime { get; private set; }
+
     public Vector2 Position { get; set; } = Vector2.Zero;
+    public int Health { get; set; } = 10;
 }

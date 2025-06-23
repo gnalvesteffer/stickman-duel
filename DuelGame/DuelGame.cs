@@ -8,6 +8,13 @@ namespace Xorberax.Duel.DuelGame;
 
 public class DuelGame : Game
 {
+    private static readonly StickmanAnimationType[] AttackAnimations =
+    [
+        StickmanAnimationType.AttackHigh,
+        StickmanAnimationType.AttackMiddle,
+        StickmanAnimationType.AttackLow
+    ];
+
     protected override string Title => "Stickman Duel by Xorberax";
 
     private readonly AsepriteAnimationInfo _stickmanAnimationInfo;
@@ -33,12 +40,17 @@ public class DuelGame : Game
         _state.PlayerStickman.Position = new Vector2(Raylib.GetScreenWidth() * 0.5f + 65, Raylib.GetScreenHeight() * 0.5f);
         _state.OpponentStickman.Position = new Vector2(Raylib.GetScreenWidth() * 0.5f - 65, Raylib.GetScreenHeight() * 0.5f);
 
-        _state.PlayerStickman.AnimationType = StickmanAnimationType.BlockHigh;
-        _state.OpponentStickman.AnimationType = StickmanAnimationType.AttackHigh;
+        _state.PlayerStickman.Animation = StickmanAnimationType.BlockHigh;
+        _state.OpponentStickman.Animation = StickmanAnimationType.AttackHigh;
     }
 
     protected override void Update(float deltaTime)
     {
+        var opponentAnimationProgress = GetStickmanAnimationFrame(_state.OpponentStickman).AnimationProgress;
+        if (opponentAnimationProgress > 1.0f)
+        {
+            _state.OpponentStickman.Animation = AttackAnimations[Random.Shared.Next(AttackAnimations.Length)];
+        }
     }
 
     protected override void Draw()
@@ -66,7 +78,8 @@ public class DuelGame : Game
 
     private void DrawStickmanShadow(Stickman stickman)
     {
-        var currentFrameInfo = GetStickmanCurrentFrameInfo(stickman);
+        var currentAnimationFrame = GetStickmanAnimationFrame(stickman);
+        var currentFrameInfo = currentAnimationFrame.FrameInfo;
 
         Raylib.DrawEllipse(
             (int)stickman.Position.X,
@@ -79,7 +92,8 @@ public class DuelGame : Game
 
     private void DrawStickman(Stickman stickman, bool shouldFlipHorizontally, Color color)
     {
-        var currentFrameInfo = GetStickmanCurrentFrameInfo(stickman);
+        var currentAnimationFrame = GetStickmanAnimationFrame(stickman);
+        var currentFrameInfo = currentAnimationFrame.FrameInfo;
 
         Raylib.DrawTextureRec(
             _stickmanSpritesheetTexture,
@@ -89,8 +103,7 @@ public class DuelGame : Game
                 currentFrameInfo.Frame.W * (shouldFlipHorizontally ? -1 : 1),
                 currentFrameInfo.Frame.H
             ),
-            stickman.Position -
-            new Vector2(
+            stickman.Position - new Vector2(
                 currentFrameInfo.Frame.W * 0.5f,
                 currentFrameInfo.Frame.H * 0.5f
             ),
@@ -98,18 +111,19 @@ public class DuelGame : Game
         );
     }
 
-    private AsepriteFrameInfo GetStickmanCurrentFrameInfo(Stickman stickman)
+    private (AsepriteFrameInfo FrameInfo, float AnimationProgress) GetStickmanAnimationFrame(Stickman stickman)
     {
-        var frameTagName = stickman.AnimationType.ToAsepriteFrameTagName();
+        var frameTagName = stickman.Animation.ToAsepriteFrameTagName();
         var frameTag = _stickmanAnimationInfo.Meta.GetFrameTag(frameTagName);
         var animationStartFrame = frameTag.From;
         var animationEndFrame = frameTag.To;
         var totalAnimationFrames = animationEndFrame - animationStartFrame;
         var elapsedAnimationTime = Raylib.GetTime() - stickman.AnimationStartTime;
         var animationFrameRate = _stickmanAnimationInfo.FrameRate;
-        var animationProgress = elapsedAnimationTime * animationFrameRate;
-        var currentFrameIndex = (int)(animationStartFrame + animationProgress % totalAnimationFrames);
-        var currentFrameInfo = _stickmanAnimationInfo.Frames[currentFrameIndex];
-        return currentFrameInfo;
+        var animationUnboundedFrameIndex = (float)(elapsedAnimationTime * animationFrameRate);
+        var currentBoundedFrameIndex = (int)(animationStartFrame + animationUnboundedFrameIndex % totalAnimationFrames);
+        var currentFrameInfo = _stickmanAnimationInfo.Frames[currentBoundedFrameIndex];
+        var animationProgress = animationUnboundedFrameIndex / totalAnimationFrames;
+        return (currentFrameInfo, animationProgress);
     }
 }
