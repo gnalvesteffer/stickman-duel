@@ -9,6 +9,7 @@ public abstract class Game
     public void Start()
     {
         Raylib.InitWindow(1280, 700, Title);
+        Raylib.InitAudioDevice();
 
         Init();
 

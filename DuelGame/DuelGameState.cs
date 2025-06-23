@@ -4,4 +4,5 @@ public class DuelGameState
 {
     public Stickman PlayerStickman { get; init; } = new();
     public Stickman OpponentStickman { get; init; } = new();
+    public bool DidHandleAttack { get; set; }
 }

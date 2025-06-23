@@ -15,6 +15,11 @@ public class Stickman
         get => _animation;
         set
         {
+            if (_animation == value)
+            {
+                return;
+            }
+
             _animation = value;
             AnimationStartTime = Raylib.GetTime();
         }

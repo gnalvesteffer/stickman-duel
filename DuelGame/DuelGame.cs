@@ -21,6 +21,8 @@ public class DuelGame : Game
 
     private DuelGameState _state = new();
     private Texture2D _stickmanSpritesheetTexture;
+    private Sound _hitSound;
+    private Sound _hitDamageSound;
 
     public DuelGame(IAsepriteAnimationManager asepriteAnimationManager)
     {
@@ -30,18 +32,26 @@ public class DuelGame : Game
     protected override void Init()
     {
         _stickmanSpritesheetTexture = Raylib.LoadTexture(AssetPaths.StickmanSpritesheet);
+        _hitSound = Raylib.LoadSound(AssetPaths.HitSound);
+        _hitDamageSound = Raylib.LoadSound(AssetPaths.HitDamageSound);
         Reset();
     }
 
     protected override void Reset()
     {
-        _state = new DuelGameState();
-
-        _state.PlayerStickman.Position = new Vector2(Raylib.GetScreenWidth() * 0.5f + 65, Raylib.GetScreenHeight() * 0.5f);
-        _state.OpponentStickman.Position = new Vector2(Raylib.GetScreenWidth() * 0.5f - 65, Raylib.GetScreenHeight() * 0.5f);
-
-        _state.PlayerStickman.Animation = StickmanAnimationType.BlockHigh;
-        _state.OpponentStickman.Animation = StickmanAnimationType.AttackHigh;
+        _state = new DuelGameState
+        {
+            PlayerStickman =
+            {
+                Position = new Vector2(Raylib.GetScreenWidth() * 0.5f + 55, Raylib.GetScreenHeight() * 0.5f),
+                Animation = StickmanAnimationType.BlockHigh
+            },
+            OpponentStickman =
+            {
+                Position = new Vector2(Raylib.GetScreenWidth() * 0.5f - 55, Raylib.GetScreenHeight() * 0.5f),
+                Animation = StickmanAnimationType.AttackHigh
+            }
+        };
     }
 
     protected override void Update(float deltaTime)
@@ -49,10 +59,39 @@ public class DuelGame : Game
         var opponentAnimationProgress = GetStickmanAnimationFrame(_state.OpponentStickman).AnimationProgress;
         if (opponentAnimationProgress > 1.0f)
         {
+            if (_state.DidHandleAttack)
+            {
+                Raylib.PlaySound(_hitSound);
+            }
+            else
+            {
+                --_state.PlayerStickman.Health;
+                if (_state.PlayerStickman.Health <= 0)
+                {
+                    Reset();
+                    return;
+                }
+
+                Raylib.PlaySound(_hitDamageSound);
+            }
+
             var newOpponentAttack = AttackAnimations[Random.Shared.Next(AttackAnimations.Length)];
             _state.OpponentStickman.Animation = newOpponentAttack;
-            _state.PlayerStickman.Animation = newOpponentAttack.GetBlockAnimationForAttack();
+            _state.DidHandleAttack = false;
         }
+
+        _state.PlayerStickman.Animation =
+            Raylib.IsKeyDown(KeyboardKey.Up) ? StickmanAnimationType.BlockHigh :
+            Raylib.IsKeyDown(KeyboardKey.Left) ? StickmanAnimationType.BlockMiddle :
+            Raylib.IsKeyDown(KeyboardKey.Right) ? StickmanAnimationType.BlockMiddle :
+            Raylib.IsKeyDown(KeyboardKey.Down) ? StickmanAnimationType.BlockLow :
+            StickmanAnimationType.Idle;
+
+        var opponentAnimation = _state.OpponentStickman.Animation;
+        var playerAnimation = _state.PlayerStickman.Animation;
+        _state.DidHandleAttack |= opponentAnimation is StickmanAnimationType.AttackHigh && playerAnimation is StickmanAnimationType.BlockHigh ||
+                                  opponentAnimation is StickmanAnimationType.AttackMiddle && playerAnimation is StickmanAnimationType.BlockMiddle ||
+                                  opponentAnimation is StickmanAnimationType.AttackLow && playerAnimation is StickmanAnimationType.BlockLow;
     }
 
     protected override void Draw()
@@ -112,7 +151,7 @@ public class DuelGame : Game
             color
         );
     }
-
+    
     private void DrawStickmanHealth(Stickman stickman)
     {
         // No Health.
@@ -123,7 +162,7 @@ public class DuelGame : Game
             20,
             Color.Red
         );
-        
+
         // Health.
         Raylib.DrawRectangle(
             (int)stickman.Position.X,
