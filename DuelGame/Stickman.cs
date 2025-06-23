@@ -26,5 +26,6 @@ public class Stickman
     public double AnimationStartTime { get; private set; }
 
     public Vector2 Position { get; set; } = Vector2.Zero;
+    public int MaxHealth { get; set; } = 10;
     public int Health { get; set; } = 10;
 }

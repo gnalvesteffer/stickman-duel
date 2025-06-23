@@ -113,6 +113,27 @@ public class DuelGame : Game
         );
     }
 
+    private void DrawStickmanHealth(Stickman stickman)
+    {
+        // No Health.
+        Raylib.DrawRectangle(
+            (int)stickman.Position.X,
+            (int)stickman.Position.Y,
+            200,
+            20,
+            Color.Red
+        );
+        
+        // Health.
+        Raylib.DrawRectangle(
+            (int)stickman.Position.X,
+            (int)stickman.Position.Y,
+            200,
+            20,
+            Color.Green
+        );
+    }
+
     private (AsepriteFrameInfo FrameInfo, float AnimationProgress) GetStickmanAnimationFrame(Stickman stickman)
     {
         var frameTagName = stickman.Animation.ToAsepriteFrameTagName();
