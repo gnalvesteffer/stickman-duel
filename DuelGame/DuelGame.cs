@@ -61,18 +61,23 @@ public class DuelGame : Game
         {
             if (_state.DidHandleAttack)
             {
+                --_state.OpponentStickman.Health;
                 Raylib.PlaySound(_hitSound);
+                if (_state.OpponentStickman.Health <= 0)
+                {
+                    Reset();
+                    return;
+                }
             }
             else
             {
                 --_state.PlayerStickman.Health;
+                Raylib.PlaySound(_hitDamageSound);
                 if (_state.PlayerStickman.Health <= 0)
                 {
                     Reset();
                     return;
                 }
-
-                Raylib.PlaySound(_hitDamageSound);
             }
 
             var newOpponentAttack = AttackAnimations[Random.Shared.Next(AttackAnimations.Length)];
@@ -104,6 +109,8 @@ public class DuelGame : Game
         DrawStickmanShadow(_state.OpponentStickman);
         DrawStickman(_state.PlayerStickman, true, Color.DarkBlue);
         DrawStickman(_state.OpponentStickman, false, Color.Red);
+        DrawStickmanHealth(_state.PlayerStickman);
+        DrawStickmanHealth(_state.OpponentStickman);
     }
 
     private void DrawBackground()
@@ -151,24 +158,28 @@ public class DuelGame : Game
             color
         );
     }
-    
+
     private void DrawStickmanHealth(Stickman stickman)
     {
+        const int healthBarWidth = 100;
+        const int healthBarHeight = 10;
+        const int healthBarOffsetY = -200;
+
         // No Health.
         Raylib.DrawRectangle(
-            (int)stickman.Position.X,
-            (int)stickman.Position.Y,
-            200,
-            20,
+            (int)(stickman.Position.X - healthBarWidth * 0.5f),
+            (int)stickman.Position.Y + healthBarOffsetY,
+            healthBarWidth,
+            healthBarHeight,
             Color.Red
         );
 
         // Health.
         Raylib.DrawRectangle(
-            (int)stickman.Position.X,
-            (int)stickman.Position.Y,
-            200,
-            20,
+            (int)(stickman.Position.X - healthBarWidth * 0.5f),
+            (int)stickman.Position.Y + healthBarOffsetY,
+            healthBarWidth * stickman.Health / stickman.MaxHealth,
+            healthBarHeight,
             Color.Green
         );
     }
